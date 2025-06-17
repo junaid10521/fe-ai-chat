@@ -9,11 +9,12 @@ import {
   notification,
 } from "antd";
 import { useEffect, useState, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const InformationSources = () => {
   const [records, setRecords] = useState([]);
+  const [agentName, setAgentName] = useState("");
   const [loading, setLoading] = useState(false);
   const [scraping, setScraping] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -21,6 +22,7 @@ const InformationSources = () => {
   const [form] = Form.useForm();
   const intervalRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const queryParams = new URLSearchParams(location.search);
   const agentId = queryParams.get("agentId");
@@ -55,6 +57,10 @@ const InformationSources = () => {
       if (res.data.success) {
         const data = res.data.data;
         setRecords(data);
+
+        if (data.length > 0 && data[0].agent_name) {
+          setAgentName(data[0].agent_name);
+        }
 
         if (data.length > 0) {
           const completedCount = data.filter((r) => r.status === "done").length;
@@ -102,8 +108,6 @@ const InformationSources = () => {
   const handleScrapeWebsite = async () => {
     try {
       const values = await form.validateFields();
-
-      // Always send an array with one full URL (as entered)
       const websitesList = [values.websites.trim()];
 
       await axios.post(
@@ -126,6 +130,7 @@ const InformationSources = () => {
     }
   };
 
+  // ✅ Move columns here, before return
   const columns = [
     {
       title: "#",
@@ -156,7 +161,14 @@ const InformationSources = () => {
 
   return (
     <div style={{ padding: "2rem" }}>
-      <h2>Webpages for Agent: {agentId}</h2>
+      <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
+        <Button onClick={() => navigate(-1)} style={{ marginRight: 16 }}>
+          ← Back
+        </Button>
+        <h2 style={{ margin: 0 }}>
+          Webpages for Agent: {agentName ? agentName : agentId}
+        </h2>
+      </div>
 
       {scraping && (
         <Progress
@@ -174,13 +186,7 @@ const InformationSources = () => {
         pagination={false}
       />
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "right",
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "right" }}>
         <Button
           type="primary"
           onClick={() => setIsModalVisible(true)}

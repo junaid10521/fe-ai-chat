@@ -90,15 +90,7 @@ const AgentTable = () => {
       dataIndex: "id",
       key: "id",
       align: "center",
-      render: (id) => (
-        <a
-          href={`/information-sources?agentId=${id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {id}
-        </a>
-      ),
+      render: (id) => <a href={`/information-sources?agentId=${id}`}>{id}</a>,
     },
     {
       title: "Actions",
